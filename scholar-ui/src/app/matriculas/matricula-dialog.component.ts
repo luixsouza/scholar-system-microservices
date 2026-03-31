@@ -4,6 +4,7 @@ import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatriculaService } from '../shared/services/matricula.service';
 import { AlunoService } from '../shared/services/aluno.service';
 import { DisciplinaService } from '../shared/services/disciplina.service';
@@ -35,10 +36,9 @@ import { Disciplina } from '../shared/models/disciplina.model';
     </mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-button mat-dialog-close>Cancelar</button>
-      <button mat-raised-button color="primary" (click)="salvar()">Matricular</button>
+      <button mat-flat-button (click)="salvar()" [disabled]="!alunoId || !disciplinaId">Matricular</button>
     </mat-dialog-actions>
-  `,
-  styles: [`.full-width { width: 100%; }`]
+  `
 })
 export class MatriculaDialogComponent implements OnInit {
   alunos: Aluno[] = [];
@@ -50,7 +50,8 @@ export class MatriculaDialogComponent implements OnInit {
     private ref: MatDialogRef<MatriculaDialogComponent>,
     private matriculaService: MatriculaService,
     private alunoService: AlunoService,
-    private disciplinaService: DisciplinaService
+    private disciplinaService: DisciplinaService,
+    private snack: MatSnackBar
   ) {}
 
   ngOnInit() {
@@ -59,9 +60,14 @@ export class MatriculaDialogComponent implements OnInit {
   }
 
   salvar() {
-    if (this.alunoId && this.disciplinaId) {
-      this.matriculaService.criar({ alunoId: this.alunoId, disciplinaId: this.disciplinaId })
-        .subscribe(() => this.ref.close(true));
-    }
+    if (!this.alunoId || !this.disciplinaId) return;
+    this.matriculaService.criar({ alunoId: this.alunoId, disciplinaId: this.disciplinaId })
+      .subscribe({
+        next: () => {
+          this.snack.open('Matricula realizada', '', { duration: 2000 });
+          this.ref.close(true);
+        },
+        error: () => this.snack.open('Erro ao matricular', '', { duration: 3000 })
+      });
   }
 }

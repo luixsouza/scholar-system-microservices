@@ -1,15 +1,25 @@
 mat-sidenav-container {
-  height: calc(100vh - 64px);
+  height: 100vh;
 }
 
 mat-sidenav {
-  width: 220px;
+  width: 200px;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.logo {
+  padding: 20px 16px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--mat-sys-primary);
 }
 
 .content {
-  padding: 24px;
+  padding: 32px;
+  max-width: 960px;
 }
 
 .active {
-  background-color: rgba(0, 0, 0, 0.04);
+  background-color: rgba(0, 0, 0, 0.04) !important;
 }

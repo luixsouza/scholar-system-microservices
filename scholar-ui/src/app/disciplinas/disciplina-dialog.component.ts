@@ -4,6 +4,7 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { DisciplinaService } from '../shared/services/disciplina.service';
 import { Disciplina } from '../shared/models/disciplina.model';
 
@@ -19,15 +20,14 @@ import { Disciplina } from '../shared/models/disciplina.model';
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Carga Horaria (horas)</mat-label>
-        <input matInput [(ngModel)]="disciplina.cargaHoraria" required type="number">
+        <input matInput [(ngModel)]="disciplina.cargaHoraria" required type="number" min="1">
       </mat-form-field>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-button mat-dialog-close>Cancelar</button>
-      <button mat-raised-button color="primary" (click)="salvar()">Salvar</button>
+      <button mat-flat-button (click)="salvar()" [disabled]="!disciplina.nome || !disciplina.cargaHoraria">Salvar</button>
     </mat-dialog-actions>
-  `,
-  styles: [`.full-width { width: 100%; }`]
+  `
 })
 export class DisciplinaDialogComponent {
   disciplina: Disciplina;
@@ -35,7 +35,8 @@ export class DisciplinaDialogComponent {
   constructor(
     private ref: MatDialogRef<DisciplinaDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: Disciplina | null,
-    private service: DisciplinaService
+    private service: DisciplinaService,
+    private snack: MatSnackBar
   ) {
     this.disciplina = data ? { ...data } : { nome: '', cargaHoraria: 0 };
   }
@@ -44,6 +45,12 @@ export class DisciplinaDialogComponent {
     const op = this.disciplina.id
       ? this.service.atualizar(this.disciplina.id, this.disciplina)
       : this.service.criar(this.disciplina);
-    op.subscribe(() => this.ref.close(true));
+    op.subscribe({
+      next: () => {
+        this.snack.open(this.disciplina.id ? 'Disciplina atualizada' : 'Disciplina cadastrada', '', { duration: 2000 });
+        this.ref.close(true);
+      },
+      error: () => this.snack.open('Erro ao salvar', '', { duration: 3000 })
+    });
   }
 }

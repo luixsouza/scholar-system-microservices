@@ -1,43 +1,45 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { DisciplinaService } from '../shared/services/disciplina.service';
 import { Disciplina } from '../shared/models/disciplina.model';
 import { DisciplinaDialogComponent } from './disciplina-dialog.component';
 
 @Component({
   selector: 'app-disciplinas',
-  imports: [MatTableModule, MatButtonModule, MatIconModule, MatDialogModule],
+  imports: [MatTableModule, MatButtonModule, MatIconModule],
   templateUrl: './disciplinas.component.html',
-  styleUrl: './disciplinas.component.scss'
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DisciplinasComponent implements OnInit {
-  displayedColumns = ['id', 'nome', 'cargaHoraria', 'acoes'];
-  disciplinas: Disciplina[] = [];
+export class DisciplinasComponent {
+  columns = ['nome', 'cargaHoraria', 'acoes'];
+  disciplinas = signal<Disciplina[]>([]);
 
-  constructor(private service: DisciplinaService, private dialog: MatDialog) {}
-
-  ngOnInit() {
+  constructor(
+    private service: DisciplinaService,
+    private dialog: MatDialog,
+    private snack: MatSnackBar
+  ) {
     this.carregar();
   }
 
   carregar() {
-    this.service.listar().subscribe(data => this.disciplinas = data);
+    this.service.listar().subscribe(data => this.disciplinas.set(data));
   }
 
   abrir(disciplina?: Disciplina) {
-    const ref = this.dialog.open(DisciplinaDialogComponent, {
-      width: '400px',
-      data: disciplina ? { ...disciplina } : null
-    });
-    ref.afterClosed().subscribe(result => {
-      if (result) this.carregar();
-    });
+    this.dialog.open(DisciplinaDialogComponent, { width: '400px', data: disciplina ? { ...disciplina } : null })
+      .afterClosed().subscribe(result => { if (result) this.carregar(); });
   }
 
-  excluir(id: number) {
-    this.service.excluir(id).subscribe(() => this.carregar());
+  excluir(disciplina: Disciplina) {
+    if (!confirm(`Excluir ${disciplina.nome}?`)) return;
+    this.service.excluir(disciplina.id!).subscribe(() => {
+      this.snack.open('Disciplina excluida', '', { duration: 2000 });
+      this.carregar();
+    });
   }
 }

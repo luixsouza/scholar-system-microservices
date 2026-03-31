@@ -4,6 +4,7 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProfessorService } from '../shared/services/professor.service';
 import { Professor } from '../shared/models/professor.model';
 
@@ -28,10 +29,9 @@ import { Professor } from '../shared/models/professor.model';
     </mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-button mat-dialog-close>Cancelar</button>
-      <button mat-raised-button color="primary" (click)="salvar()">Salvar</button>
+      <button mat-flat-button (click)="salvar()" [disabled]="!professor.nome || !professor.email || !professor.titulacao">Salvar</button>
     </mat-dialog-actions>
-  `,
-  styles: [`.full-width { width: 100%; }`]
+  `
 })
 export class ProfessorDialogComponent {
   professor: Professor;
@@ -39,7 +39,8 @@ export class ProfessorDialogComponent {
   constructor(
     private ref: MatDialogRef<ProfessorDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: Professor | null,
-    private service: ProfessorService
+    private service: ProfessorService,
+    private snack: MatSnackBar
   ) {
     this.professor = data ? { ...data } : { nome: '', email: '', titulacao: '' };
   }
@@ -48,6 +49,12 @@ export class ProfessorDialogComponent {
     const op = this.professor.id
       ? this.service.atualizar(this.professor.id, this.professor)
       : this.service.criar(this.professor);
-    op.subscribe(() => this.ref.close(true));
+    op.subscribe({
+      next: () => {
+        this.snack.open(this.professor.id ? 'Professor atualizado' : 'Professor cadastrado', '', { duration: 2000 });
+        this.ref.close(true);
+      },
+      error: () => this.snack.open('Erro ao salvar', '', { duration: 3000 })
+    });
   }
 }
