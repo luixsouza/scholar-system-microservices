@@ -1,0 +1,32 @@
+<mat-toolbar color="primary">
+  <span>SOAPE</span>
+</mat-toolbar>
+
+<mat-sidenav-container>
+  <mat-sidenav mode="side" opened>
+    <mat-nav-list>
+      <a mat-list-item routerLink="/alunos" routerLinkActive="active">
+        <mat-icon matListItemIcon>school</mat-icon>
+        <span matListItemTitle>Alunos</span>
+      </a>
+      <a mat-list-item routerLink="/professores" routerLinkActive="active">
+        <mat-icon matListItemIcon>person</mat-icon>
+        <span matListItemTitle>Professores</span>
+      </a>
+      <a mat-list-item routerLink="/disciplinas" routerLinkActive="active">
+        <mat-icon matListItemIcon>menu_book</mat-icon>
+        <span matListItemTitle>Disciplinas</span>
+      </a>
+      <a mat-list-item routerLink="/matriculas" routerLinkActive="active">
+        <mat-icon matListItemIcon>assignment</mat-icon>
+        <span matListItemTitle>Matriculas</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <div class="content">
+      <router-outlet />
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

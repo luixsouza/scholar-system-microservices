@@ -1,0 +1,43 @@
+<div class="header">
+  <h2>Alunos</h2>
+  <button mat-raised-button color="primary" (click)="abrir()">
+    <mat-icon>add</mat-icon> Novo Aluno
+  </button>
+</div>
+
+<table mat-table [dataSource]="alunos">
+  <ng-container matColumnDef="id">
+    <th mat-header-cell *matHeaderCellDef>ID</th>
+    <td mat-cell *matCellDef="let a">{{ a.id }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="nome">
+    <th mat-header-cell *matHeaderCellDef>Nome</th>
+    <td mat-cell *matCellDef="let a">{{ a.nome }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="email">
+    <th mat-header-cell *matHeaderCellDef>Email</th>
+    <td mat-cell *matCellDef="let a">{{ a.email }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="matricula">
+    <th mat-header-cell *matHeaderCellDef>Matricula</th>
+    <td mat-cell *matCellDef="let a">{{ a.matricula }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="acoes">
+    <th mat-header-cell *matHeaderCellDef>Acoes</th>
+    <td mat-cell *matCellDef="let a">
+      <button mat-icon-button color="primary" (click)="abrir(a)">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button mat-icon-button color="warn" (click)="excluir(a.id)">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
