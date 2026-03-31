@@ -7,31 +7,31 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "students")
-public class Student {
+@Table(name = "alunos")
+public class Aluno {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
+    private String nome;
     private String email;
-    private String registration;
+    private String matricula;
 
-    public Student() {}
+    public Aluno() {}
 
-    public Student(Long id, String name, String email, String registration) {
+    public Aluno(Long id, String nome, String email, String matricula) {
         this.id = id;
-        this.name = name;
+        this.nome = nome;
         this.email = email;
-        this.registration = registration;
+        this.matricula = matricula;
     }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
-    public String getRegistration() { return registration; }
-    public void setRegistration(String registration) { this.registration = registration; }
+    public String getMatricula() { return matricula; }
+    public void setMatricula(String matricula) { this.matricula = matricula; }
 }

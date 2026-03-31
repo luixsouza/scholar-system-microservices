@@ -1,8 +1,8 @@
 package com.scholar.student.controller;
 
-import com.scholar.student.dto.StudentRequestDTO;
-import com.scholar.student.dto.StudentResponseDTO;
-import com.scholar.student.service.StudentService;
+import com.scholar.student.dto.AlunoRequestDTO;
+import com.scholar.student.dto.AlunoResponseDTO;
+import com.scholar.student.service.AlunoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,41 +14,41 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/students")
+@RequestMapping("/api/alunos")
 @Tag(name = "Alunos", description = "Gerenciamento de alunos")
-public class StudentController {
+public class AlunoController {
 
-    private final StudentService service;
+    private final AlunoService service;
 
-    public StudentController(StudentService service) {
+    public AlunoController(AlunoService service) {
         this.service = service;
     }
 
     @PostMapping
     @Operation(summary = "Cadastrar aluno", description = "Cadastra um novo aluno no sistema")
     @ApiResponse(responseCode = "201", description = "Aluno cadastrado com sucesso")
-    public ResponseEntity<StudentResponseDTO> create(@Valid @RequestBody StudentRequestDTO dto) {
+    public ResponseEntity<AlunoResponseDTO> create(@Valid @RequestBody AlunoRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
     }
 
     @GetMapping
     @Operation(summary = "Listar alunos", description = "Retorna todos os alunos cadastrados")
     @ApiResponse(responseCode = "200", description = "Lista de alunos")
-    public ResponseEntity<List<StudentResponseDTO>> findAll() {
+    public ResponseEntity<List<AlunoResponseDTO>> findAll() {
         return ResponseEntity.ok(service.findAll());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Buscar aluno por ID", description = "Retorna um aluno pelo seu ID")
     @ApiResponse(responseCode = "200", description = "Aluno encontrado")
-    public ResponseEntity<StudentResponseDTO> findById(@PathVariable Long id) {
+    public ResponseEntity<AlunoResponseDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar aluno", description = "Atualiza os dados de um aluno existente")
     @ApiResponse(responseCode = "200", description = "Aluno atualizado com sucesso")
-    public ResponseEntity<StudentResponseDTO> update(@PathVariable Long id, @Valid @RequestBody StudentRequestDTO dto) {
+    public ResponseEntity<AlunoResponseDTO> update(@PathVariable Long id, @Valid @RequestBody AlunoRequestDTO dto) {
         return ResponseEntity.ok(service.update(id, dto));
     }
 
