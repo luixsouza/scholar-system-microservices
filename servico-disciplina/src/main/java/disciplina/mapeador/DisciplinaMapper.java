@@ -12,6 +12,7 @@ public class DisciplinaMapper {
         Disciplina disciplina = new Disciplina();
         disciplina.setNome(dto.nome());
         disciplina.setCargaHoraria(dto.cargaHoraria());
+        disciplina.setQtdMatriculas(0);
         return disciplina;
     }
 
@@ -19,7 +20,8 @@ public class DisciplinaMapper {
         return new DisciplinaResponseDTO(
                 disciplina.getId(),
                 disciplina.getNome(),
-                disciplina.getCargaHoraria()
+                disciplina.getCargaHoraria(),
+                disciplina.getQtdMatriculas()
         );
     }
 

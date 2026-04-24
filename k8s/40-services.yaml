@@ -1,0 +1,257 @@
+# Configurações compartilhadas pelos 4 microsserviços de negócio
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: escolar-app-config
+  namespace: escolar
+data:
+  EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: "http://discovery-server.escolar.svc.cluster.local:8761/eureka/"
+  ZIPKIN_ENDPOINT: "http://zipkin.observability.svc.cluster.local:9411/api/v2/spans"
+  KAFKA_BOOTSTRAP_SERVERS: "kafka-0.kafka.escolar.svc.cluster.local:9092"
+  DATASOURCE_HOST: "postgres-0.postgres.escolar.svc.cluster.local"
+---
+# === SERVICO ALUNO ===
+apiVersion: v1
+kind: Service
+metadata:
+  name: servico-aluno
+  namespace: escolar
+spec:
+  ports:
+    - port: 8081
+      targetPort: 8081
+  selector:
+    app: servico-aluno
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: servico-aluno
+  namespace: escolar
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: servico-aluno
+  template:
+    metadata:
+      labels:
+        app: servico-aluno
+    spec:
+      containers:
+        - name: app
+          image: escolar/servico-aluno:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081
+          envFrom:
+            - configMapRef:
+                name: escolar-app-config
+            - secretRef:
+                name: postgres-credentials
+          env:
+            - name: DATASOURCE_URL
+              value: "jdbc:postgresql://postgres-0.postgres.escolar.svc.cluster.local:5432/aluno_db"
+            - name: DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef: { name: postgres-credentials, key: POSTGRES_USER }
+            - name: DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: postgres-credentials, key: POSTGRES_PASSWORD }
+          startupProbe:
+            httpGet: { path: /actuator/health, port: 8081 }
+            failureThreshold: 120
+            periodSeconds: 5
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: 8081 }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: 8081 }
+            periodSeconds: 20
+            failureThreshold: 5
+          resources:
+            requests: { cpu: 300m, memory: 512Mi }
+            limits:   { cpu: 1500m, memory: 768Mi }
+---
+# === SERVICO PROFESSOR ===
+apiVersion: v1
+kind: Service
+metadata:
+  name: servico-professor
+  namespace: escolar
+spec:
+  ports:
+    - port: 8082
+      targetPort: 8082
+  selector:
+    app: servico-professor
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: servico-professor
+  namespace: escolar
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: servico-professor
+  template:
+    metadata:
+      labels:
+        app: servico-professor
+    spec:
+      containers:
+        - name: app
+          image: escolar/servico-professor:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082
+          envFrom:
+            - configMapRef:
+                name: escolar-app-config
+          env:
+            - name: DATASOURCE_URL
+              value: "jdbc:postgresql://postgres-0.postgres.escolar.svc.cluster.local:5432/professor_db"
+            - name: DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef: { name: postgres-credentials, key: POSTGRES_USER }
+            - name: DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: postgres-credentials, key: POSTGRES_PASSWORD }
+          startupProbe:
+            httpGet: { path: /actuator/health, port: 8082 }
+            failureThreshold: 120
+            periodSeconds: 5
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: 8082 }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: 8082 }
+            periodSeconds: 20
+            failureThreshold: 5
+          resources:
+            requests: { cpu: 300m, memory: 512Mi }
+            limits:   { cpu: 1500m, memory: 768Mi }
+---
+# === SERVICO DISCIPLINA ===
+apiVersion: v1
+kind: Service
+metadata:
+  name: servico-disciplina
+  namespace: escolar
+spec:
+  ports:
+    - port: 8083
+      targetPort: 8083
+  selector:
+    app: servico-disciplina
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: servico-disciplina
+  namespace: escolar
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: servico-disciplina
+  template:
+    metadata:
+      labels:
+        app: servico-disciplina
+    spec:
+      containers:
+        - name: app
+          image: escolar/servico-disciplina:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8083
+          envFrom:
+            - configMapRef:
+                name: escolar-app-config
+          env:
+            - name: DATASOURCE_URL
+              value: "jdbc:postgresql://postgres-0.postgres.escolar.svc.cluster.local:5432/disciplina_db"
+            - name: DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef: { name: postgres-credentials, key: POSTGRES_USER }
+            - name: DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: postgres-credentials, key: POSTGRES_PASSWORD }
+          startupProbe:
+            httpGet: { path: /actuator/health, port: 8083 }
+            failureThreshold: 120
+            periodSeconds: 5
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: 8083 }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: 8083 }
+            periodSeconds: 20
+            failureThreshold: 5
+          resources:
+            requests: { cpu: 300m, memory: 512Mi }
+            limits:   { cpu: 1500m, memory: 768Mi }
+---
+# === SERVICO MATRICULA ===
+apiVersion: v1
+kind: Service
+metadata:
+  name: servico-matricula
+  namespace: escolar
+spec:
+  ports:
+    - port: 8084
+      targetPort: 8084
+  selector:
+    app: servico-matricula
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: servico-matricula
+  namespace: escolar
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: servico-matricula
+  template:
+    metadata:
+      labels:
+        app: servico-matricula
+    spec:
+      containers:
+        - name: app
+          image: escolar/servico-matricula:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8084
+          envFrom:
+            - configMapRef:
+                name: escolar-app-config
+          env:
+            - name: DATASOURCE_URL
+              value: "jdbc:postgresql://postgres-0.postgres.escolar.svc.cluster.local:5432/matricula_db"
+            - name: DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef: { name: postgres-credentials, key: POSTGRES_USER }
+            - name: DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: postgres-credentials, key: POSTGRES_PASSWORD }
+          startupProbe:
+            httpGet: { path: /actuator/health, port: 8084 }
+            failureThreshold: 120
+            periodSeconds: 5
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: 8084 }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: 8084 }
+            periodSeconds: 20
+            failureThreshold: 5
+          resources:
+            requests: { cpu: 300m, memory: 512Mi }
+            limits:   { cpu: 1500m, memory: 768Mi }

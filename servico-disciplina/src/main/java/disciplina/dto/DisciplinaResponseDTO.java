@@ -11,5 +11,8 @@ public record DisciplinaResponseDTO(
         String nome,
 
         @Schema(description = "Carga horaria em horas", example = "80")
-        Integer cargaHoraria
+        Integer cargaHoraria,
+
+        @Schema(description = "Quantidade de alunos matriculados", example = "12")
+        Integer qtdMatriculas
 ) {}

@@ -1,5 +1,6 @@
 package disciplina.modelo;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,12 +17,16 @@ public class Disciplina {
     private String nome;
     private Integer cargaHoraria;
 
+    @Column(name = "qtd_matriculas", nullable = false)
+    private Integer qtdMatriculas = 0;
+
     public Disciplina() {}
 
     public Disciplina(Long id, String nome, Integer cargaHoraria) {
         this.id = id;
         this.nome = nome;
         this.cargaHoraria = cargaHoraria;
+        this.qtdMatriculas = 0;
     }
 
     public Long getId() { return id; }
@@ -30,4 +35,6 @@ public class Disciplina {
     public void setNome(String nome) { this.nome = nome; }
     public Integer getCargaHoraria() { return cargaHoraria; }
     public void setCargaHoraria(Integer cargaHoraria) { this.cargaHoraria = cargaHoraria; }
+    public Integer getQtdMatriculas() { return qtdMatriculas; }
+    public void setQtdMatriculas(Integer qtdMatriculas) { this.qtdMatriculas = qtdMatriculas; }
 }

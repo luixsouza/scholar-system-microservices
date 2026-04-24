@@ -1,9 +1,9 @@
 FROM node:24-alpine AS build
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm install --include=dev
 COPY . .
-RUN npx ng build --configuration=production
+RUN ./node_modules/.bin/ng build --configuration=production
 
 FROM nginx:alpine
 COPY --from=build /app/dist/escolar-ui/browser /usr/share/nginx/html
