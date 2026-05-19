@@ -25,6 +25,8 @@ spec:
       labels:
         app: api-gateway
     spec:
+      nodeSelector:
+        role: infra
       containers:
         - name: api-gateway
           image: escolar/api-gateway:latest

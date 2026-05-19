@@ -25,6 +25,8 @@ spec:
       labels:
         app: escolar-ui
     spec:
+      nodeSelector:
+        role: infra
       containers:
         - name: ui
           image: escolar/escolar-ui:latest

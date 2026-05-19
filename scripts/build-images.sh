@@ -36,8 +36,16 @@ for svc in "${TARGETS[@]}"; do
   else
     docker build -t "$image" -f "$dockerfile" .
   fi
-  echo "==> Importando $image no k3d cluster $CLUSTER_NAME"
-  k3d image import "$image" -c "$CLUSTER_NAME"
+  # Importa no k3d se ele existir (modo single-host antigo). Para o modo
+  # distribuido em 2 PCs (k3s nativo), rode scripts/export-images.sh apos
+  # buildar para gerar os tarballs e distribuir.
+  if command -v k3d >/dev/null 2>&1 && k3d cluster list "$CLUSTER_NAME" >/dev/null 2>&1; then
+    echo "==> Importando $image no k3d cluster $CLUSTER_NAME"
+    k3d image import "$image" -c "$CLUSTER_NAME"
+  else
+    echo "==> k3d nao detectado para cluster $CLUSTER_NAME. Pulando import."
+    echo "    (para k3s distribuido, rode scripts/export-images.sh depois)"
+  fi
 done
 
 echo

@@ -31,6 +31,8 @@ spec:
       labels:
         app: kafka
     spec:
+      nodeSelector:
+        role: infra
       containers:
         - name: kafka
           image: apache/kafka:3.7.0

@@ -8,11 +8,23 @@
 #  6. Verificar load balancing (chamar 5x e logar pods atendendo)
 #
 # Pré-requisito: cluster up + deploy concluídos.
+#
+# Configuracao: edite .env.distributed na raiz do projeto.
+# Para modo legado (k3d/single-host), exporte API=http://api.escolar.localhost:8088
+# antes de rodar.
 
 set -euo pipefail
 
-API="http://api.escolar.localhost:8088"
-ZIPKIN="http://zipkin.localhost:8088"
+# shellcheck source=_load-env.sh
+source "$(dirname "$0")/_load-env.sh"
+
+# Por padrao usa o IP do PC-1 (k3s distribuido). Pode ser sobrescrito com export API=...
+API="${API:-http://${PC1_IP:-localhost}}"
+ZIPKIN="${ZIPKIN:-http://localhost:9411}"
+
+echo "==> Usando API=${API}"
+echo "==> Usando ZIPKIN=${ZIPKIN}  (rode: kubectl -n observability port-forward svc/zipkin 9411:9411)"
+echo
 
 echo "==> 1) Criando aluno"
 ALUNO=$(curl -fsS -X POST "$API/api/alunos" -H 'Content-Type: application/json' \
@@ -47,8 +59,8 @@ else
 fi
 
 echo
-echo "==> 5) Verificando spans no Zipkin"
-SERVICES=$(curl -fsS "$ZIPKIN/api/v2/services" || echo "[]")
+echo "==> 5) Verificando spans no Zipkin (em $ZIPKIN)"
+SERVICES=$(curl -fsS "$ZIPKIN/api/v2/services" 2>/dev/null || echo "[]")
 echo "Serviços com tracing: $SERVICES"
 
 echo

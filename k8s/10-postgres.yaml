@@ -50,6 +50,8 @@ spec:
       labels:
         app: postgres
     spec:
+      nodeSelector:
+        role: infra
       containers:
         - name: postgres
           image: postgres:16-alpine

@@ -25,6 +25,8 @@ spec:
       labels:
         app: discovery-server
     spec:
+      nodeSelector:
+        role: infra
       containers:
         - name: discovery-server
           image: escolar/discovery-server:latest

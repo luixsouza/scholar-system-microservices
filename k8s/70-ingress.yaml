@@ -1,16 +1,30 @@
+# Ingress unico exposto na LAN via Traefik (k3s built-in).
+# Acesso a partir de qualquer maquina da LAN: http://<IP-PC1>/
+#   /          -> escolar-ui  (Angular)
+#   /api/*     -> api-gateway (Spring Cloud Gateway)
+#
+# Eureka dashboard e Zipkin sao acessados via kubectl port-forward
+# no PC-1 durante a demo (rotas com path rewrite quebram os assets desses
+# dashboards, entao mantemos eles acessiveis localmente apenas).
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ui-ingress
+  name: escolar-ingress
   namespace: escolar
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web
 spec:
   ingressClassName: traefik
   rules:
-    - host: escolar.localhost
-      http:
+    - http:
         paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 8080
           - path: /
             pathType: Prefix
             backend:
@@ -18,62 +32,3 @@ spec:
                 name: escolar-ui
                 port:
                   number: 80
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: api-ingress
-  namespace: escolar
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web
-spec:
-  ingressClassName: traefik
-  rules:
-    - host: api.escolar.localhost
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: api-gateway
-                port:
-                  number: 8080
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: eureka-ingress
-  namespace: escolar
-spec:
-  ingressClassName: traefik
-  rules:
-    - host: eureka.localhost
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: discovery-server
-                port:
-                  number: 8761
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: zipkin-ingress
-  namespace: observability
-spec:
-  ingressClassName: traefik
-  rules:
-    - host: zipkin.localhost
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: zipkin
-                port:
-                  number: 9411
