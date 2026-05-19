@@ -97,6 +97,59 @@ foreach ($port in 6443, 80, 8088) {
 
 > Em qualquer das opções, teste antes da demo: do PC-2 faça `ping <IP-PC1>` e `curl http://<IP-PC1>:80` (ou a porta que o ingress usar). Se não responder, a demo não vai funcionar — resolva a rede antes de tudo.
 
+### Confirmar que voce esta no WSL Ubuntu (nao no Docker Desktop)
+
+Erro comum: abrir o terminal errado e cair no WSL `docker-desktop` (BusyBox, root direto, sem `apt`/`sudo`). Verifique:
+
+```bash
+cat /etc/os-release | head -2     # Esperado: NAME="Ubuntu"
+whoami                            # Esperado: seu usuario, NAO "root"
+which sudo                        # Esperado: /usr/bin/sudo
+```
+
+Se falhar, no PowerShell: `wsl -l -v` mostra as distros instaladas. Se nao tiver Ubuntu, instale:
+
+```powershell
+wsl --install -d Ubuntu-22.04
+wsl --set-default Ubuntu-22.04
+```
+
+### Habilitar systemd no WSL Ubuntu (CRITICO para k3s)
+
+K3s registra um service systemd. Sem systemd ele instala mas nao sobe. Verifique:
+
+```bash
+ps -p 1 -o comm=                  # Esperado: systemd
+```
+
+Se vier `init` ou `sh`, habilite:
+
+```bash
+sudo tee /etc/wsl.conf > /dev/null <<'EOF'
+[boot]
+systemd=true
+EOF
+```
+
+E no PowerShell do Windows: `wsl --shutdown`. Reabra o Ubuntu e confira de novo.
+
+### Instalar pre-requisitos no WSL Ubuntu
+
+```bash
+sudo apt update
+sudo apt install -y curl git
+```
+
+### Habilitar integracao Docker Desktop ↔ WSL Ubuntu
+
+Para o `docker build` funcionar dentro do WSL Ubuntu: abra o **Docker Desktop** no Windows → Settings → Resources → WSL Integration → ative o toggle para **Ubuntu-22.04** → Apply & Restart.
+
+Teste no WSL Ubuntu:
+
+```bash
+docker ps                         # tabela vazia, sem erro de permissao
+```
+
 ---
 
 ## 3. Setup do cluster (passo a passo)
@@ -110,10 +163,19 @@ Toda a configuracao mora em `.env.distributed` na raiz do projeto. Editou esse a
 Em cada PC, dentro do WSL Ubuntu, descubra o IP da LAN:
 
 ```bash
-hostname -I | awk '{print $1}'
+hostname -I
 ```
 
-Anote: `PC-1 = 192.168.x.y` e `PC-2 = 192.168.x.z`.
+Pode retornar mais de um IP se voce tem Tailscale, VPN, etc. Os IPs tipicos:
+
+| Range | O que e | Usar? |
+|---|---|---|
+| `192.168.x.x` ou `10.0.x.x` | LAN do roteador | **SIM** (caminho normal) |
+| `100.64.x.x` ate `100.127.x.x` | Tailscale (CGNAT) | So como plano B se a LAN bloquear peer-to-peer |
+| `172.16-31.x.x` | Subnet NAT do WSL (mirrored OFF) | **NAO** — invisivel na LAN |
+| `fd7a:...` ou outros IPv6 | Ignorar |  |
+
+Anote o IP da LAN de cada PC: `PC-1 = 192.168.x.y` e `PC-2 = 192.168.x.z`.
 
 Crie o arquivo de configuracao **com os mesmos valores em ambos os PCs**:
 
